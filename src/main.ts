@@ -1,17 +1,30 @@
-import 'phaser';
+import Phaser from 'phaser'
 
-import TestScene from './scenes/PlayScene';
+import PlayScene from './scenes/PlayScene'
+import PreloadScene from './scenes/PreloadScene'
 
-const config:GameConfig = {
-    type: Phaser.AUTO,
-    parent: 'content',
-    width: 640,
-    height: 480,
-    resolution: 1, 
-    backgroundColor: "#EDEEC9",
-    scene: [
-      TestScene
-    ]
+const WIDTH = 600 ;
+const HEIGHT = 320 ;
+const BIRD_POSITION = { x: WIDTH * 0.1, y: HEIGHT / 2 };
+
+const SHARED_CONFIG = {
+  width: WIDTH,
+  height: HEIGHT,
+  startPosition: BIRD_POSITION,
 };
 
-new Phaser.Game(config);
+const Scenes = [PreloadScene, PlayScene];
+const createScene = (Scene) => new Scene(SHARED_CONFIG);
+
+const initScenes = () => Scenes.map(createScene);
+
+const config: Phaser.Types.Core.GameConfig = {
+	type: Phaser.AUTO,
+	...SHARED_CONFIG,
+	physics: {
+		default: 'arcade',
+	},
+	scene: initScenes()
+}
+
+export default new Phaser.Game(config)

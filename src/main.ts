@@ -1,7 +1,7 @@
-import Phaser from "phaser";
+import Phaser from 'phaser';
 
-import PlayScene from "./scenes/PlayScene";
-import PreloadScene from "./scenes/PreloadScene";
+import PlayScene from './scenes/lvl1/PlayScene';
+import PreloadScene from './scenes/lvl1/PreloadScene';
 
 export interface SharedConfig {
   width: number;
@@ -28,7 +28,10 @@ const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   ...SHARED_CONFIG,
   physics: {
-    default: "arcade",
+    default: 'arcade',
+    // arcade: {
+    //   debug: true,
+    // },
   },
   scene: initScenes(),
 };

@@ -29,9 +29,7 @@ const config: Phaser.Types.Core.GameConfig = {
   ...SHARED_CONFIG,
   physics: {
     default: 'arcade',
-    // arcade: {
-    //   debug: true,
-    // },
+    //
   },
   scene: initScenes(),
 };

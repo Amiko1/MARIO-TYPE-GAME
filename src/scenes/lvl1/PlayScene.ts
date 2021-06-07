@@ -29,7 +29,7 @@ interface Props {
 export default class PlayScene extends Phaser.Scene {
   // player: Phaser.GameObjects.Sprite;
   config: SharedConfig;
-
+  playingArea = 6000;
   constructor(config) {
     super({
       key: 'PlayScene',
@@ -48,11 +48,14 @@ export default class PlayScene extends Phaser.Scene {
       this.config.height
     );
 
-    const player = this.createPlayer();
     const map = this.createMap();
     const layers = this.createLayers(map);
+    const playerZones = this.getPlayerZones(layers.playerZones);
+    const player = this.createPlayer(playerZones);
 
     this.playerCollider(player, layers.platformsCollider);
+
+    this.setupFollowUpCamera(player);
   }
 
   createMap() {
@@ -70,13 +73,15 @@ export default class PlayScene extends Phaser.Scene {
       'main',
       parameters.tileset1
     );
+    const playerZones = parameters.map.getObjectLayer('player_zones').objects;
+
     platformsCollider.setCollisionByExclusion(-1, true);
 
-    return { platformsCollider };
+    return { platformsCollider, playerZones };
   }
 
-  createPlayer(): Phaser.Physics.Arcade.Sprite {
-    return new Player(this, 100, 250);
+  createPlayer({ start }): Phaser.Physics.Arcade.Sprite {
+    return new Player(this, start.x, start.y);
   }
 
   playerCollider(player, object) {
@@ -129,5 +134,20 @@ export default class PlayScene extends Phaser.Scene {
       .setScale(scale * 1.5)
       .setOrigin(0, 1)
       .setScrollFactor(0);
+  }
+
+  setupFollowUpCamera(player) {
+    this.physics.world.setBounds(0, 0, this.playingArea);
+    this.cameras.main.setBounds(0, 0, this.playingArea, this.config.height);
+    this.cameras.main.startFollow(player);
+  }
+
+  getPlayerZones(playerZonesLayer) {
+    const playerZones = playerZonesLayer;
+
+    return {
+      start: playerZones.find((zone) => zone.name == 'startZone'),
+      end: playerZones.find((zone) => zone.name == 'endZone'),
+    };
   }
 }

@@ -22,6 +22,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     this.cursors = this.scene.input.keyboard.createCursorKeys();
 
     Animations(this.scene.anims);
+    this.setCollideWorldBounds(true);
   }
 
   initEvents(): void {
@@ -29,18 +30,18 @@ class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   update() {
-    const cam = this.scene.cameras.main;
-    const speed = 2;
+    // const cam = this.scene.cameras.main;
+    // const speed = 2;
     const { left, right, space } = this.cursors;
     const onFloor = this.body.onFloor();
 
     if (left.isDown) {
-      cam.scrollX -= speed;
+      // cam.scrollX -= speed;
       this.setFlipX(true);
       this.setVelocityX(-this.playerSpeed);
     } else if (right.isDown) {
       this.setFlipX(false);
-      cam.scrollX += speed;
+      // cam.scrollX += speed;
       this.setVelocityX(this.playerSpeed);
     } else {
       this.setVelocityX(0);

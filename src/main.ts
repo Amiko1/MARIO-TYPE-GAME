@@ -7,6 +7,7 @@ export interface SharedConfig {
   width: number;
   height: number;
   startPosition: { x: number; y: number };
+  debug: boolean
 }
 
 const WIDTH = 600;
@@ -17,6 +18,7 @@ const SHARED_CONFIG: SharedConfig = {
   width: WIDTH,
   height: HEIGHT,
   startPosition: BIRD_POSITION,
+  debug: false,
 };
 
 const Scenes = [PreloadScene, PlayScene];
@@ -29,6 +31,9 @@ const config: Phaser.Types.Core.GameConfig = {
   ...SHARED_CONFIG,
   physics: {
     default: 'arcade',
+    arcade: {
+      debug: SHARED_CONFIG.debug,
+    }
     //
   },
   scene: initScenes(),

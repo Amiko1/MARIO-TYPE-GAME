@@ -1,6 +1,9 @@
 import Phaser from 'phaser';
 import { SharedConfig } from '../../main';
-import Player from './Player';
+import Player from './Player'
+import Birdman from './enemies/Birdman'
+import Enemies from './groups/Enemies'
+
 
 const creeateAligned = (
   scene: Phaser.Scene,
@@ -30,14 +33,18 @@ export default class PlayScene extends Phaser.Scene {
   // player: Phaser.GameObjects.Sprite;
   config: SharedConfig;
   playingArea = 6000;
+  plotting: boolean;
+  health: Phaser.Physics.Arcade.Group;
+  healthBar
   constructor(config) {
     super({
       key: 'PlayScene',
     });
     this.config = config;
+
   }
 
-  preload() {}
+  preload() { }
 
   create() {
     this.background();
@@ -48,15 +55,21 @@ export default class PlayScene extends Phaser.Scene {
       this.config.height
     );
 
+
+
     const map = this.createMap();
     const layers = this.createLayers(map);
     const playerZones = this.getPlayerZones(layers.playerZones);
     const player = this.createPlayer(playerZones);
+    const enemies = this.createEnemies(layers.enemySpawns, layers.platformsCollider);
 
+    this.createHealthBar();
     this.playerCollider(player, layers.platformsCollider);
-
+    this.enemyCollider(enemies, layers.platformsCollider, player, this.health)
     this.setupFollowUpCamera(player);
+
   }
+
 
   createMap() {
     const map = this.make.tilemap({ key: 'map' });
@@ -74,14 +87,36 @@ export default class PlayScene extends Phaser.Scene {
       parameters.tileset1
     );
     const playerZones = parameters.map.getObjectLayer('player_zones').objects;
+    const enemySpawns = parameters.map.getObjectLayer('enemy_spawns').objects;
 
     platformsCollider.setCollisionByExclusion(-1, true);
 
-    return { platformsCollider, playerZones };
+    return { platformsCollider, playerZones, enemySpawns };
   }
 
-  createPlayer({ start }): Phaser.Physics.Arcade.Sprite {
-    return new Player(this, start.x, start.y);
+  createPlayer(playerZones): Phaser.Physics.Arcade.Sprite {
+    return new Player(this, playerZones, this.config);
+  }
+
+  createEnemies(spawnLayers, platformsCollider) {
+    const enemies = new Enemies(this);
+    spawnLayers.map((spawnPoint, i) => {
+      // if (i === 1 || i === 2) { return; }
+      const enemy = new Birdman(this, spawnPoint.x, spawnPoint.y);
+      enemy.setPlatformColliders(platformsCollider)
+      enemies.add(enemy)
+    });
+
+    return enemies
+  }
+
+  onPlayerCollision(enemy, player) {
+    player.takesHit(enemy, this.health);
+  }
+
+  enemyCollider(enemies, object, player) {
+    this.physics.add.collider(enemies, object);
+    this.physics.add.collider(enemies, player, this.onPlayerCollision);
   }
 
   playerCollider(player, object) {
@@ -147,7 +182,21 @@ export default class PlayScene extends Phaser.Scene {
 
     return {
       start: playerZones.find((zone) => zone.name == 'startZone'),
+      firstRespawn: playerZones.find((zone) => zone.name == 'spawnZone1'),
+      secondRespawn: playerZones.find((zone) => zone.name == 'spawnZone2'),
       end: playerZones.find((zone) => zone.name == 'endZone'),
     };
   }
+
+  createHealthBar() {
+    this.health = this.physics.add.group();
+    let position = 20;
+    for (let i = 0; i <= 2; i++) {
+      this.health.create(position, 20, 'health').setScrollFactor(0);
+      position += 40;
+    }
+    return this.health
+  }
+
+
 }
